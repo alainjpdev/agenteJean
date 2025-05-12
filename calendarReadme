@@ -1,0 +1,86 @@
+🔧 Workflow Name: _calendarAgentJP
+
+Purpose:
+To create an AI-powered calendar assistant that understands natural language queries (e.g., “schedule a meeting tomorrow at 10”), interacts with Google Calendar, and manages event tasks like creating, updating, deleting, or retrieving events — all integrated with a Google Sheet for contact references.
+
+⸻
+
+🧠 Core Components
+
+1. AI Brain (LLM):
+	•	Node: OpenAI Chat Model
+	•	Function: Interprets the user’s natural language query.
+	•	Credential used: OpenAiJP
+
+⸻
+
+2. Main Agent: Calendar Agent
+	•	Type: LangChain Tools Agent
+	•	Role: Acts on AI instructions to perform calendar operations.
+	•	System Prompt Includes Instructions:
+	•	When to use specific tools: Create Event, Delete Event, Create Meet, etc.
+	•	Spanish-based instructions to ensure proper formatting and behavior.
+	•	Assumes 1-hour default duration if unspecified.
+	•	Encourages grouping all invitees into a single meeting.
+	•	Connected Tools (via LangChain ai_tool):
+	•	Create Event with Attendee
+	•	Create Event
+	•	Create Meet
+	•	Get Events
+	•	Delete Event
+	•	Update Event
+	•	contact_tool (Google Sheets lookup)
+
+⸻
+
+🗓️ Calendar Actions
+Node Name
+Action
+Details
+Create Event
+For individual or personal events
+Uses eventStart, eventEnd, and eventTitle
+Create Event with Attendee
+For events with guests
+Uses eventAttendeeEmail
+Create Meet
+Google Meet creation + invitees
+Includes Attendees, eventTitle, and auto-adds Meet link
+Get Events
+Queries event list around a date
+Uses dayBefore and dayAfter
+Delete Event
+Deletes event by ID
+Requires prior call to Get Events
+Update Event
+Updates event timing
+Uses eventID, startTime, and endTime
+
+
+📄 Additional Data Sources
+
+contact_tool
+	•	A Google Sheet used to look up participant emails.
+	•	Sheet: Tareas
+	•	Document ID: 1u8prOJIjD7qt2rWXstjgQmObk_Nl8J3qNcaSQgkS8oU
+
+⸻
+
+✅ Success/Error Handling
+	•	On successful operation: Success node returns the final response.
+	•	On failure: Try Again node provides a fallback message (“Unable to perform task. Please try again.”).
+
+⸻
+
+⚙️ Trigger
+	•	Triggered by another workflow, likely when the AI agent from the main automation (as shown in your screenshots) detects a calendar task.
+
+⸻
+
+🌐 Tech Stack Summary
+	•	n8n (workflow engine)
+	•	LangChain Agent (structured AI logic)
+	•	OpenAI API (language understanding)
+	•	Google Calendar API
+	•	Google Sheets
+	•	JSON field mapping with AI variable resolution ($fromAI(...))
