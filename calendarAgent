@@ -1,0 +1,453 @@
+{
+  "name": "_calendarAgentJP",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "38123668-6875-457f-8737-925eb531a8d9",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -1080,
+        480
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "ail4kqmLizIQgDvu",
+          "name": "OpenAiJP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7ab380a2-a8d3-421c-ab4e-748ea8fb7904",
+              "name": "response",
+              "value": "Unable to perform task. Please try again.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5591511d-9ca1-4e34-ba87-ab66530fb12a",
+      "name": "Try Again",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "39c2f302-03be-4464-a17a-d7cc481d6d44",
+              "name": "=response",
+              "value": "={{$json.output}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "626df4e2-b9a2-4ae2-b3db-ddd2f95251a6",
+      "name": "Success",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=Eres un asistente de calendario. Tus responsabilidades incluyen crear, consultar y eliminar eventos en el calendario de Daniel Santos.\n\nHerramientas de GestiÃ³n de Calendario\nUsa \"Create Event with Attendee\" cuando el evento incluya a uno o mÃ¡s participantes.\n\nUsa \"Create Event\" para eventos individuales o personales.\n\nUsa \"Create Meet\" para reuniones por Google Meet. Y aÃ±ade el email de los invitados buscando en contact_tool (si no te lo proporcionan).\n\nUsa \"Get Events\" para consultar la agenda del calendario cuando se solicite.\n\nUsa \"Delete Event\" para eliminar un evento. Primero debes usar \"Get Events\" para obtener el ID del evento que deseas eliminar.\n\nUsa \"Update Event\" para modificar un evento existente. Primero debes usar \"Get Events\" para obtener el ID del evento que deseas actualizar.\n\nNotas Finales\nLa fecha y hora actual es: {{ $now }}\n\nSi no se especifica una duraciÃ³n para un evento, asume que durarÃ¡ una hora.\n\nAsegÃºrate de incluir el enlace de Google Meet en los eventos con participantes, segÃºn lo proporcione el agente matriz.\n\nðŸ”´ IMPORTANTE\nSi te piden crear una reuniÃ³n con varias personas, debes crear una Ãºnica reuniÃ³n con todos los invitados aÃ±adidos como participantes.\nNo crees mÃºltiples eventos separados.\n\n\n\n\n\n"
+        }
+      },
+      "id": "d451fa7a-176b-4fe1-9f6d-38a6b2858f10",
+      "name": "Calendar Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        -660,
+        200
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "algorithmicschoolpa@gmail.com",
+          "mode": "list",
+          "cachedResultName": "algorithmicschoolpa@gmail.com"
+        },
+        "start": "={{ $fromAI(\"eventStart\") }}",
+        "end": "={{ $fromAI(\"eventEnd\") }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI(\"eventAttendeeEmail\") }}"
+          ],
+          "summary": "={{ $fromAI(\"eventTitle\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -240,
+        440
+      ],
+      "id": "ea6123f2-ce3d-4fdc-9695-54356f281514",
+      "name": "Create Event with Attendee",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "i2wLpEacP63sHo32",
+          "name": "Google Calendar account algo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "algorithmicschoolpa@gmail.com",
+          "mode": "list",
+          "cachedResultName": "algorithmicschoolpa@gmail.com"
+        },
+        "start": "={{ $fromAI(\"eventStart\") }}",
+        "end": "={{ $fromAI(\"eventEnd\") }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI(\"invitados\") }}"
+          ],
+          "summary": "={{ $fromAI(\"eventTitle\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -500,
+        560
+      ],
+      "id": "199ae52d-e028-4ee4-84d9-af7b3a8cc7c3",
+      "name": "Create Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "i2wLpEacP63sHo32",
+          "name": "Google Calendar account algo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "algorithmicschoolpa@gmail.com",
+          "mode": "list",
+          "cachedResultName": "algorithmicschoolpa@gmail.com"
+        },
+        "timeMin": "={{ $fromAI(\"dayBefore\",\"the day before the date the user requested\") }}",
+        "timeMax": "={{ $fromAI(\"dayAfter\",\"the day after the date the user requested\") }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        580
+      ],
+      "id": "3eba3b4b-4536-436f-86bf-b59bfbaaeb54",
+      "name": "Get Events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "i2wLpEacP63sHo32",
+          "name": "Google Calendar account algo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "algorithmicschoolpa@gmail.com",
+          "mode": "list",
+          "cachedResultName": "algorithmicschoolpa@gmail.com"
+        },
+        "eventId": "={{ $fromAI(\"eventID\") }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -780,
+        560
+      ],
+      "id": "77762669-cba4-44d9-a0f1-03560f507d6c",
+      "name": "Delete Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "i2wLpEacP63sHo32",
+          "name": "Google Calendar account algo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "algorithmicschoolpa@gmail.com",
+          "mode": "list",
+          "cachedResultName": "algorithmicschoolpa@gmail.com"
+        },
+        "eventId": "={{ $fromAI(\"eventID\") }}",
+        "updateFields": {
+          "end": "={{ $fromAI(\"endTime\") }}",
+          "start": "={{ $fromAI(\"startTime\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -920,
+        520
+      ],
+      "id": "5c758bfd-0567-4d25-9dfe-548dee8679d6",
+      "name": "Update Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "i2wLpEacP63sHo32",
+          "name": "Google Calendar account algo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -940,
+        200
+      ],
+      "id": "549002f2-ecfc-49d5-bb99-c074041601b9",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "algorithmicschoolpa@gmail.com",
+          "mode": "list",
+          "cachedResultName": "algorithmicschoolpa@gmail.com"
+        },
+        "start": "={{ $fromAI(\"eventStart\") }}",
+        "end": "={{ $fromAI(\"eventEnd\") }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI('Attendees', ``, 'string') }}"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "summary": "={{ $fromAI(\"eventTitle\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -380,
+        520
+      ],
+      "id": "a48b8e0c-3635-4067-ac78-41c1aa2e095f",
+      "name": "Create Meet",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "i2wLpEacP63sHo32",
+          "name": "Google Calendar account algo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1u8prOJIjD7qt2rWXstjgQmObk_Nl8J3qNcaSQgkS8oU",
+          "mode": "list",
+          "cachedResultName": "Lista de tareash",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u8prOJIjD7qt2rWXstjgQmObk_Nl8J3qNcaSQgkS8oU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1386834576,
+          "mode": "list",
+          "cachedResultName": "Tareas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u8prOJIjD7qt2rWXstjgQmObk_Nl8J3qNcaSQgkS8oU/edit#gid=1386834576"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        -100,
+        400
+      ],
+      "id": "2e7a5df1-7178-42b7-81fd-3967fe37096f",
+      "name": "contact_tool",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "5rpgeNuBszgu0wLi",
+          "name": "Google Sheets account algo"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Agent": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Try Again",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Event with Attendee": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Meet": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "contact_tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Cancun",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "fb1f80cd-ed07-4db9-a672-ddc4045da6f1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1f22f6d2ceecf12b3b9de11241d15949468b704f87cbe0ac3842a9a0b327a8c1"
+  },
+  "id": "2K0h7uEkcu13s9mC",
+  "tags": []
+}
